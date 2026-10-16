@@ -1,0 +1,84 @@
+.carousel.slider {
+  position: relative;
+  width: 100%;
+  /* max-width: 1000px; */
+  margin: 0 auto;
+  overflow: hidden;
+  border-radius: 8px;
+}
+
+/* Slide Base Styling */
+.carousel.slider .slide {
+  position: relative;
+  width: 100%;
+  display: none; /* JS ke through active slide toggle hogi */
+}
+
+/* Image Wrapper */
+.carousel.slider .slide .slide-image {
+  width: 100%;
+  line-height: 0;
+}
+
+.carousel.slider .slide .slide-image picture,
+.carousel.slider .slide .slide-image img {
+  width: 100%;
+  height: 450px;
+  object-fit: cover;
+  display: block;
+}
+
+/* Text Overlay Styling */
+.carousel.slider .slide .slide-text {
+  position: absolute;
+  bottom: 20%;
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
+  color: #ffffff;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.7);
+  z-index: 2;
+  padding: 10px 20px;
+}
+
+.carousel.slider .slide .slide-text h1,
+.carousel.slider .slide .slide-text h2,
+.carousel.slider .slide .slide-text p {
+  margin: 4px 0;
+  color: inherit;
+}
+
+/* Navigation Buttons */
+.carousel.slider button.slide-prev,
+.carousel.slider button.slide-next {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(255, 255, 255, 0.75);
+  color: #222222;
+  border: none;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 24px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 5;
+  transition: background 0.3s ease;
+}
+
+.carousel.slider button.slide-prev:hover,
+.carousel.slider button.slide-next:hover {
+  background: #ffffff;
+}
+
+.carousel.slider button.slide-prev {
+  left: 16px;
+}
+
+.carousel.slider button.slide-next {
+  right: 16px;
+}

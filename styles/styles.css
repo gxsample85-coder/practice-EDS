@@ -12,8 +12,8 @@
 
 :root {
   /* colors */
-  --background-color: whrgb(183, 183, 183)
-  --light-color: #f8f8f8;
+  --background-color: whrgb(183, 183, 183);
+  --light-color: #bdbdbd;
   --dark-color: #505050;
   --text-color: #131313;
   --link-color: #3b63fb;
@@ -86,6 +86,7 @@ body.appear {
 
 header {
   height: var(--nav-height);
+  background-color: var(--light-color)
 }
 
 header .header,
