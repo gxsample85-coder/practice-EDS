@@ -1,0 +1,19 @@
+{
+  "project": "Practice EDS",
+  "host": "main--practice-eds--gxsample85-coder.aem.live",
+  "plugins": [
+    {
+      "id": "library",
+      "title": "Block Library",
+      "environments": ["edit"],
+      "url": "/tools/sidekick/library/index.html",
+      "includePaths": ["/**"]
+    },
+    {
+      "id": "tags",
+      "title": "Tags Selector",
+      "environments": ["edit", "preview"],
+      "url": "/tools/sidekick/tags/index.html"
+    }
+  ]
+}
