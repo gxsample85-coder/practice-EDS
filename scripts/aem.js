@@ -713,11 +713,14 @@ export {
  */
 export async function fetchPlaceholders(prefix = 'default') {
   window.placeholders = window.placeholders || {};
-  const loaded = window.placeholders[`${prefix}`];
+  let root = prefix === 'default' ? '' : prefix;
+  if (root && !root.startsWith('/')) {
+    root = `/${root}`;
+  }
 
-  if (!loaded) {
-    window.placeholders[`${prefix}`] = new Promise((resolve) => {
-      const url = `${prefix === 'default' ? '' : prefix}/placeholders.json`;
+  if (!window.placeholders[root]) {
+    window.placeholders[root] = new Promise((resolve) => {
+      const url = `${root}/placeholders.json`;
       fetch(url)
         .then((resp) => {
           if (resp.ok) {
@@ -727,21 +730,21 @@ export async function fetchPlaceholders(prefix = 'default') {
         })
         .then((json) => {
           const placeholders = {};
-          // JSON array ko key-value object mein convert karta hai
           (json.data || []).forEach((item) => {
             if (item.Key) {
+              // Standard camelCase aur raw key dono support karega
+              placeholders[toCamelCase(item.Key)] = item.Text;
               placeholders[item.Key] = item.Text;
             }
           });
-          window.placeholders[`${prefix}`] = placeholders;
-          resolve(window.placeholders[`${prefix}`]);
+          window.placeholders[root] = placeholders;
+          resolve(window.placeholders[root]);
         })
         .catch(() => {
-          // Error aane par empty object fallback
-          window.placeholders[`${prefix}`] = {};
-          resolve(window.placeholders[`${prefix}`]);
+          window.placeholders[root] = {};
+          resolve(window.placeholders[root]);
         });
     });
   }
-  return window.placeholders[`${prefix}`];
+  return window.placeholders[root];
 }
