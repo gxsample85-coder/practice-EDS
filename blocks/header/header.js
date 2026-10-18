@@ -157,4 +157,59 @@ export default async function decorate(block) {
   navWrapper.className = 'nav-wrapper';
   navWrapper.append(nav);
   block.append(navWrapper);
+  const langSwitcher = createLanguageSwitcher();
+  block.append(langSwitcher);
+}
+
+/**
+ * Language switcher dropdown create karta hai
+ * @returns {HTMLElement} Switcher ka wrapper div
+ */
+function createLanguageSwitcher() {
+  const currentPath = window.location.pathname; // Jaise: /en/about-us ya /de/about-us
+  const segments = currentPath.split('/').filter(Boolean); // Empty strings remove karein
+  
+  // Maan lijiye supported languages yeh hain:
+  const supportedLangs = ['en', 'de', 'fr'];
+  
+  // Current language identify karein (default 'en')
+  const currentLang = supportedLangs.includes(segments[0]) ? segments[0] : 'en';
+  
+  // Page ka bacha hua path (jaise 'about-us' ya 'products/item-1')
+  const remainingPath = supportedLangs.includes(segments[0]) 
+    ? segments.slice(1).join('/') 
+    : segments.join('/');
+
+  // Dropdown container create karein
+  const switcher = document.createElement('div');
+  switcher.className = 'language-switcher';
+
+  // Options configure karein
+  const languages = [
+    { code: 'en', label: 'English' },
+    { code: 'de', label: 'Deutsch' },
+    { code: 'fr', label: 'Français' },
+  ];
+
+  const select = document.createElement('select');
+  select.setAttribute('aria-label', 'Select Language');
+
+  languages.forEach((lang) => {
+    const option = document.createElement('option');
+    // Naya target URL: /<lang>/<remainingPath>
+    option.value = `/${lang.code}/${remainingPath}`;
+    option.textContent = lang.label;
+    if (lang.code === currentLang) {
+      option.selected = true; // Current language ko pre-select karein
+    }
+    select.appendChild(option);
+  });
+
+  // User select change kare toh naye URL par redirect ho
+  select.addEventListener('change', (e) => {
+    window.location.href = e.target.value;
+  });
+
+  switcher.appendChild(select);
+  return switcher;
 }
