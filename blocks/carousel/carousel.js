@@ -68,7 +68,17 @@
 // }
 
 
-export default function decorate(block) {
+import { fetchPlaceholders } from '../../scripts/aem.js';
+
+export default async function decorate(block) {
+  // 1. Current URL se language prefix detect karein (/de ya /en)
+  const langPrefix = window.location.pathname.startsWith('/de') ? '/de' : '/en';
+
+  // 2. Sahi language ke placeholders fetch karein
+  const placeholders = await fetchPlaceholders(langPrefix);
+  const prevLabel = placeholders.previousSlide || placeholders['previous-slide'] || 'Previous';
+  const nextLabel = placeholders.nextSlide || placeholders['next-slide'] || 'Next';
+
   const rows = [...block.children];
   const prevText = rows[0]?.innerText.trim() || '‹';
   const nextText = rows[rows.length - 1]?.innerText.trim() || '›';
@@ -85,11 +95,11 @@ export default function decorate(block) {
     `;
   }).join('');
 
-  // Pura block structure 1 line me replace
+  // 3. Buttons mein dynamic placeholders (prevLabel & nextLabel) bind karein
   block.innerHTML = `
-    <button class="slide-prev" aria-label="Previous">${prevText}</button>
+    <button class="slide-prev" aria-label="${prevLabel}">${prevText}</button>
     <div class="slides-wrapper">${slidesHtml}</div>
-    <button class="slide-next" aria-label="Next">${nextText}</button>
+    <button class="slide-next" aria-label="${nextLabel}">${nextText}</button>
   `;
 
   // Slider navigation logic
