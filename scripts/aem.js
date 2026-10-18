@@ -704,3 +704,44 @@ export {
   waitForFirstImage,
   wrapTextNodes,
 };
+
+
+/**
+ * Placeholders sheet se data fetch aur cache karta hai
+ * @param {string} [prefix] - Folder path (e.g. '/en' ya '/de')
+ * @returns {Promise<Object>} Key-value pairs ka object
+ */
+export async function fetchPlaceholders(prefix = 'default') {
+  window.placeholders = window.placeholders || {};
+  const loaded = window.placeholders[`${prefix}`];
+
+  if (!loaded) {
+    window.placeholders[`${prefix}`] = new Promise((resolve) => {
+      const url = `${prefix === 'default' ? '' : prefix}/placeholders.json`;
+      fetch(url)
+        .then((resp) => {
+          if (resp.ok) {
+            return resp.json();
+          }
+          return { data: [] };
+        })
+        .then((json) => {
+          const placeholders = {};
+          // JSON array ko key-value object mein convert karta hai
+          (json.data || []).forEach((item) => {
+            if (item.Key) {
+              placeholders[item.Key] = item.Text;
+            }
+          });
+          window.placeholders[`${prefix}`] = placeholders;
+          resolve(window.placeholders[`${prefix}`]);
+        })
+        .catch(() => {
+          // Error aane par empty object fallback
+          window.placeholders[`${prefix}`] = {};
+          resolve(window.placeholders[`${prefix}`]);
+        });
+    });
+  }
+  return window.placeholders[`${prefix}`];
+}

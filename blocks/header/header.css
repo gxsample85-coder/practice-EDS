@@ -271,3 +271,25 @@ header nav .nav-sections .nav-drop > button[aria-expanded='false'] + ul {
 header nav .nav-tools {
   grid-area: tools;
 }
+
+
+.language-switcher {
+  display: inline-flex;
+  align-items: center;
+  margin-left: auto; /* Right side push karne ke liye */
+  padding: 0 10px;
+}
+
+.language-switcher select {
+  padding: 6px 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background-color: #fff;
+  font-size: 14px;
+  cursor: pointer;
+  outline: none;
+}
+
+.language-switcher select:hover {
+  border-color: #888;
+}
