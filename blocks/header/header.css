@@ -293,3 +293,18 @@ header nav .nav-tools {
 .language-switcher select:hover {
   border-color: #888;
 }
+
+.nav-tools .language-switcher {
+  display: flex;
+  align-items: center;
+  margin-left: 1rem;
+}
+
+.nav-tools .language-switcher select {
+  padding: 6px 10px;
+  font-size: 14px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  background-color: #fff;
+  cursor: pointer;
+}
