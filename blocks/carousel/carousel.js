@@ -97,9 +97,9 @@ export default async function decorate(block) {
 
   // 3. Buttons mein dynamic placeholders (prevLabel & nextLabel) bind karein
   block.innerHTML = `
-    <button class="slide-prev" aria-label="${prevLabel}">${prevText}</button>
+    <button class="slide-prev" aria-label="${prevLabel}" type="button">‹</button>
     <div class="slides-wrapper">${slidesHtml}</div>
-    <button class="slide-next" aria-label="${nextLabel}">${nextText}</button>
+    <button class="slide-next" aria-label="${nextLabel}" type="button">›</button>
   `;
 
   // Slider navigation logic

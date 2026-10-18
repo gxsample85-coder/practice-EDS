@@ -68,17 +68,13 @@ function toggleMenu(nav, navSections, forceExpanded = null) {
   const expanded = forceExpanded !== null ? !forceExpanded : nav.getAttribute('aria-expanded') === 'true';
   const button = nav.querySelector('.nav-hamburger button');
   document.body.style.overflowY = (expanded || isDesktop.matches) ? '' : 'hidden';
-  // the desktop nav is always expanded, so aria-expanded only applies to the mobile menu
   if (isDesktop.matches) nav.removeAttribute('aria-expanded');
   else nav.setAttribute('aria-expanded', expanded ? 'false' : 'true');
   toggleAllNavSections(navSections, expanded || isDesktop.matches ? 'false' : 'true');
   button.setAttribute('aria-label', expanded ? 'Open navigation' : 'Close navigation');
 
-  // enable menu collapse on escape keypress
   if (!expanded || isDesktop.matches) {
-    // collapse menu on escape press
     window.addEventListener('keydown', closeOnEscape);
-    // collapse menu on focus lost
     nav.addEventListener('focusout', closeOnFocusLost);
   } else {
     window.removeEventListener('keydown', closeOnEscape);
@@ -91,16 +87,29 @@ function toggleMenu(nav, navSections, forceExpanded = null) {
  * @param {Element} block The header block element
  */
 export default async function decorate(block) {
-  // load nav as fragment
+  // 1. Current language identify karein
+  const currentPath = window.location.pathname;
+  const segments = currentPath.split('/').filter(Boolean);
+  const supportedLangs = ['en', 'de', 'fr'];
+  const currentLang = supportedLangs.includes(segments[0]) ? segments[0] : 'en';
+
+  // 2. Language-specific nav fragment load karein (e.g. /de/nav ya /en/nav)
   const navMeta = getMetadata('nav');
-  const navPath = navMeta ? new URL(navMeta, window.location).pathname : '/nav';
-  const fragment = await loadFragment(navPath);
+  const defaultNavPath = currentLang === 'en' ? '/nav' : `/${currentLang}/nav`;
+  const navPath = navMeta ? new URL(navMeta, window.location).pathname : defaultNavPath;
+
+  let fragment;
+  try {
+    fragment = await loadFragment(navPath);
+  } catch (e) {
+    fragment = await loadFragment('/nav');
+  }
 
   // decorate nav DOM
   block.textContent = '';
   const nav = document.createElement('nav');
   nav.id = 'nav';
-  while (fragment.firstElementChild) nav.append(fragment.firstElementChild);
+  while (fragment && fragment.firstElementChild) nav.append(fragment.firstElementChild);
 
   const classes = ['brand', 'sections', 'tools'];
   classes.forEach((c, i) => {
@@ -109,7 +118,7 @@ export default async function decorate(block) {
   });
 
   const navBrand = nav.querySelector('.nav-brand');
-  const brandLink = navBrand.querySelector('.button');
+  const brandLink = navBrand ? navBrand.querySelector('.button') : null;
   if (brandLink) {
     brandLink.className = '';
     brandLink.closest('.button-container').className = '';
@@ -121,7 +130,6 @@ export default async function decorate(block) {
       const subList = navSection.querySelector(':scope > ul');
       if (!subList) return;
       navSection.classList.add('nav-drop');
-      // wrap the dropdown label in a button so it is announced as expandable
       const button = document.createElement('button');
       button.type = 'button';
       button.setAttribute('aria-expanded', false);
@@ -140,6 +148,15 @@ export default async function decorate(block) {
     });
   }
 
+  // 3. Language switcher ko nav-tools mein append karein
+  const langSwitcher = createLanguageSwitcher();
+const navTools = nav.querySelector('.nav-tools');
+if (navTools) {
+  navTools.append(langSwitcher);
+} else {
+  nav.append(langSwitcher);
+}
+
   // hamburger for mobile
   const hamburger = document.createElement('div');
   hamburger.classList.add('nav-hamburger');
@@ -149,7 +166,7 @@ export default async function decorate(block) {
   hamburger.addEventListener('click', () => toggleMenu(nav, navSections));
   nav.prepend(hamburger);
   nav.setAttribute('aria-expanded', 'false');
-  // prevent mobile nav behavior on window resize
+
   toggleMenu(nav, navSections, isDesktop.matches);
   isDesktop.addEventListener('change', () => toggleMenu(nav, navSections, isDesktop.matches));
 
@@ -157,38 +174,32 @@ export default async function decorate(block) {
   navWrapper.className = 'nav-wrapper';
   navWrapper.append(nav);
   block.append(navWrapper);
-  const langSwitcher = createLanguageSwitcher();
-  block.append(langSwitcher);
 }
 
 /**
  * Language switcher dropdown create karta hai
- * @returns {HTMLElement} Switcher ka wrapper div
  */
 function createLanguageSwitcher() {
-  const currentPath = window.location.pathname; // Jaise: /en/about-us ya /de/about-us
-  const segments = currentPath.split('/').filter(Boolean); // Empty strings remove karein
+  const currentPath = window.location.pathname; // jaise: /en/carousel
+  const supportedLangs = ['en', 'de'];
   
-  // Maan lijiye supported languages yeh hain:
-  const supportedLangs = ['en', 'de', 'fr'];
-  
-  // Current language identify karein (default 'en')
+  // URL ko tod kar segments nikaalein: ['en', 'carousel']
+  const segments = currentPath.split('/').filter(Boolean);
+
+  // Current language identify karein (agar pehla segment 'en' ya 'de' hai)
   const currentLang = supportedLangs.includes(segments[0]) ? segments[0] : 'en';
-  
-  // Page ka bacha hua path (jaise 'about-us' ya 'products/item-1')
-  const remainingPath = supportedLangs.includes(segments[0]) 
-    ? segments.slice(1).join('/') 
+
+  // Bacha hua path (jaise 'carousel')
+  const pagePath = supportedLangs.includes(segments[0])
+    ? segments.slice(1).join('/')
     : segments.join('/');
 
-  // Dropdown container create karein
   const switcher = document.createElement('div');
   switcher.className = 'language-switcher';
 
-  // Options configure karein
   const languages = [
     { code: 'en', label: 'English' },
     { code: 'de', label: 'Deutsch' },
-    { code: 'fr', label: 'Français' },
   ];
 
   const select = document.createElement('select');
@@ -196,18 +207,24 @@ function createLanguageSwitcher() {
 
   languages.forEach((lang) => {
     const option = document.createElement('option');
-    // Naya target URL: /<lang>/<remainingPath>
-    option.value = `/${lang.code}/${remainingPath}`;
+
+    // Page path ke sath target URL banayein: /de/carousel ya /en/carousel
+    const targetUrl = pagePath ? `/${lang.code}/${pagePath}` : `/${lang.code}`;
+    
+    option.value = `${targetUrl}${window.location.search}${window.location.hash}`;
     option.textContent = lang.label;
+
     if (lang.code === currentLang) {
-      option.selected = true; // Current language ko pre-select karein
+      option.selected = true;
     }
     select.appendChild(option);
   });
 
-  // User select change kare toh naye URL par redirect ho
   select.addEventListener('change', (e) => {
-    window.location.href = e.target.value;
+    const target = e.target.value;
+    if (target !== window.location.pathname) {
+      window.location.href = target;
+    }
   });
 
   switcher.appendChild(select);

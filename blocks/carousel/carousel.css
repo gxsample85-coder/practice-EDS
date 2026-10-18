@@ -82,3 +82,25 @@
 .carousel.slider button.slide-next {
   right: 16px;
 }
+
+.carousel .slide-prev,
+.carousel .slide-next {
+  background: rgba(0, 0, 0, 0.6);
+  color: #fff;
+  border: none;
+  font-size: 24px;
+  line-height: 1;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s ease;
+}
+
+.carousel .slide-prev:hover,
+.carousel .slide-next:hover {
+  background: rgba(0, 0, 0, 0.9);
+}
